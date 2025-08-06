@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>敷地図PDFエディタ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="sidebar">
+        <h3>モード選択</h3>
+        <div class="mode-buttons">
+            <button class="mode-button active" onclick="setMode('select')">選択</button>
+            <button class="mode-button" onclick="setMode('place')">配置</button>
+            <button class="mode-button" onclick="setMode('area')">範囲配置</button>
+        </div>
+        
+        <h3>建物タイプ</h3>
+        
+        <div class="building-option" data-type="A" data-width="6.37" data-height="8.19" data-color="#3498db">
+            <strong>建物A（PLAN-①）</strong><br>
+            サイズ: 6.37m × 8.19m<br>
+            <small>戸建住宅（7×9グリッド）</small>
+        </div>
+        
+        <div class="building-option" data-type="B" data-width="5.46" data-height="7.28" data-color="#27ae60">
+            <strong>建物B（PLAN-②）</strong><br>
+            サイズ: 5.46m × 7.28m<br>
+            <small>戸建住宅（6×8グリッド）</small>
+        </div>
+        
+        <div class="building-option" data-type="C" data-width="42" data-height="43" data-color="#e67e22">
+            <strong>サ高住</strong><br>
+            サイズ: 42m × 43m<br>
+            <small>サービス付き高齢者向け住宅（46×47グリッド）</small>
+        </div>
+        
+        <div class="building-option" data-type="D" data-width="19.5" data-height="34.2" data-color="#9b59b6">
+            <strong>集合住宅</strong><br>
+            サイズ: 19.5m × 34.2m<br>
+            <small>アパート（21×38グリッド）</small>
+        </div>
+        
+        <div class="controls">
+            <h3>配置情報</h3>
+            
+            <div class="grid-info" id="grid-info">
+                建物タイプを選択してください
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label for="shortSideSpacing">短辺方向の間隔: <span id="shortSpacingValue">1.2</span>m</label>
+                <input type="range" id="shortSideSpacing" min="0" max="5" step="0.1" value="1.2" style="width: 100%;">
+                <small style="color: #666;">0m（密着）〜 5m</small>
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <label for="longSideSpacing">長辺方向の間隔: <span id="longSpacingValue">1.2</span>m</label>
+                <input type="range" id="longSideSpacing" min="0" max="5" step="0.1" value="1.2" style="width: 100%;">
+                <small style="color: #666;">0m（密着）〜 5m</small>
+            </div>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                ※ 赤色マーカー＝入口（建物A,Bの下側）<br>
+                ※ 短辺側：テラス(0.91m)＋玄関＋ポーチ(1.2m)のため間隔必要<br>
+                ※ 長辺側は密着配置可能<br>
+                ※ スケール: 1/1000 (1m = 4px)
+            </p>
+        </div>
+    </div>
+    
+    <div id="main-area">
+        <div id="toolbar">
+            <button onclick="SiteMapUtils.deleteSelected()">選択削除</button>
+            <button onclick="SiteMapUtils.rotateSelected()">90度回転</button>
+            <button onclick="SiteMapUtils.clearAll()">すべて削除</button>
+            <button onclick="SiteMapCanvas.toggleGrid()">グリッド表示/非表示</button>
+            <input type="file" id="pdfInput" accept=".pdf" style="display: none;" onchange="SiteMapCanvas.loadPDF(event)">
+            <button onclick="document.getElementById('pdfInput').click()">PDF読込</button>
+            <button onclick="SiteMapCanvas.clearBackground()">背景クリア</button>
+            <button onclick="SiteMapUtils.exportJSON()">JSON出力</button>
+            <button onclick="SiteMapUtils.exportPDF()">PDF出力</button>
+            <span class="status" id="status">建物タイプを選択してください</span>
+        </div>
+        
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- JavaScript files -->
+    <script src="js/config.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/building.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
