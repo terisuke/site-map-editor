@@ -204,11 +204,7 @@
         clearBackground,
         getCanvas: () => canvas,
         getBackgroundImage: () => backgroundImage,
-        getGridLines: () => gridLines,
-        // 互換性のために定数も公開
-        GRID_SIZE,
-        SCALE,
-        GRID_UNIT
+        getGridLines: () => gridLines
     };
     
 })(window);

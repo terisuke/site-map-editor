@@ -2,10 +2,14 @@
 (function(window) {
     'use strict';
     
-    // 設定を取得
-    const CONFIG = window.SiteMapConfig;
-    const SCALE = CONFIG.SCALE;
-    const GRID_SIZE = CONFIG.GRID.SIZE;
+    // 設定を取得（遅延評価）
+    function getConfig() {
+        return window.SiteMapConfig || {
+            SCALE: 4,
+            GRID: { SIZE: 3.64 },
+            DEFAULT_SPACING: { SHORT_SIDE: 1.2, LONG_SIDE: 1.2 }
+        };
+    }
     
     // アプリケーション状態
     const appState = {
@@ -101,6 +105,7 @@
                 appState.isDrawing = true;
                 appState.startPoint = { x: pointer.x, y: pointer.y };
                 
+                const CONFIG = getConfig();
                 appState.selectionRect = new fabric.Rect({
                     left: appState.startPoint.x,
                     top: appState.startPoint.y,
@@ -187,6 +192,7 @@
             
             appState.isDrawing = false;
             
+            const CONFIG = getConfig();
             if (appState.selectionRect.width > CONFIG.AREA_SELECTION.MIN_WIDTH && 
                 appState.selectionRect.height > CONFIG.AREA_SELECTION.MIN_HEIGHT) {
                 window.SiteMapBuilding.placeMultipleBuildings({
@@ -216,6 +222,7 @@
             setupEventHandlers();
             
             // デフォルト間隔を設定
+            const CONFIG = getConfig();
             window.SiteMapBuilding.setSpacing(
                 CONFIG.DEFAULT_SPACING.SHORT_SIDE,
                 CONFIG.DEFAULT_SPACING.LONG_SIDE
