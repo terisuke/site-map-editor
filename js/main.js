@@ -78,6 +78,73 @@
         return status;
     }
 
+    // 既存の建物を再描画（箱のみモード切替時）
+    function updateExistingBuildings() {
+        const objects = appState.canvas.getObjects();
+        const boxOnly = document.getElementById('boxOnly');
+        const boxOnlyMode = boxOnly && boxOnly.checked;
+        
+        objects.forEach(obj => {
+            if (obj.buildingType && (obj.buildingType === 'A' || obj.buildingType === 'B')) {
+                const CONFIG = window.SiteMapConfig;
+                const buildingConfig = CONFIG.BUILDING_TYPES[obj.buildingType];
+                
+                // 現在の位置と回転を保存
+                const left = obj.left;
+                const top = obj.top;
+                const angle = obj.angle;
+                const buildingType = obj.buildingType;
+                const isPair = obj.isPair;
+                
+                // 古い建物を削除
+                appState.canvas.remove(obj);
+                
+                // 新しい建物を作成
+                let newBuilding;
+                if (isPair) {
+                    // ペア建物の場合
+                    newBuilding = window.SiteMapBuilding.createPairBuilding(left, top, buildingType);
+                } else {
+                    // 通常の建物の場合
+                    newBuilding = window.SiteMapBuilding.createBuilding(left, top, buildingType, angle);
+                }
+                
+                if (newBuilding) {
+                    appState.canvas.add(newBuilding);
+                }
+            }
+        });
+        
+        appState.canvas.renderAll();
+    }
+    
+    // 建物の色を更新
+    function updateBuildingColors(type) {
+        const objects = appState.canvas.getObjects();
+        const colorCheckbox = document.getElementById(`color${type}`);
+        const useColor = colorCheckbox && colorCheckbox.checked;
+        const CONFIG = window.SiteMapConfig;
+        const buildingConfig = CONFIG.BUILDING_TYPES[type];
+        const newColor = useColor ? buildingConfig.color : '#cccccc';
+        
+        objects.forEach(obj => {
+            if (obj.buildingType === type) {
+                if (obj._objects) {
+                    // グループ内のすべての矩形要素の色を変更
+                    obj._objects.forEach(shape => {
+                        // 入口マーカー（赤色）以外の矩形の色を変更
+                        if (shape.type === 'rect' && shape.fill !== CONFIG.ENTRANCE_MARKER.COLOR) {
+                            shape.set('fill', newColor);
+                        }
+                    });
+                    obj.dirty = true;
+                }
+            }
+        });
+        
+        appState.canvas.renderAll();
+    }
+
     // イベントハンドラー設定
     function setupEventHandlers() {
         // 建物タイプ選択
@@ -205,6 +272,40 @@
             
             appState.canvas.remove(appState.selectionRect);
             appState.selectionRect = null;
+        });
+        
+        // ペア配置チェックボックスのイベントハンドラー
+        const pairPlacementCheckbox = document.getElementById('pairPlacement');
+        if (pairPlacementCheckbox) {
+            pairPlacementCheckbox.addEventListener('change', function() {
+                // 範囲選択中の場合、リアルタイムで情報更新
+                if (appState.currentMode === 'area' && appState.selectionRect) {
+                    window.SiteMapBuilding.updateGridInfo(
+                        appState.selectionRect.width,
+                        appState.selectionRect.height
+                    );
+                }
+            });
+        }
+        
+        // 箱のみ表示チェックボックスのイベントハンドラー
+        const boxOnlyCheckbox = document.getElementById('boxOnly');
+        if (boxOnlyCheckbox) {
+            boxOnlyCheckbox.addEventListener('change', function() {
+                // 既存の建物を再描画
+                updateExistingBuildings();
+            });
+        }
+        
+        // カラー表示チェックボックスのイベントハンドラー
+        ['A', 'B', 'C', 'D'].forEach(type => {
+            const colorCheckbox = document.getElementById(`color${type}`);
+            if (colorCheckbox) {
+                colorCheckbox.addEventListener('change', function() {
+                    // 既存の建物の色を更新
+                    updateBuildingColors(type);
+                });
+            }
         });
     }
 

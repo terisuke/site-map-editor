@@ -24,24 +24,42 @@
             <strong>建物A（PLAN-①）</strong><br>
             サイズ: 6.37m × 8.19m<br>
             <small>戸建住宅（7×9グリッド）</small>
+            <div class="option-controls">
+                <label><input type="checkbox" id="colorA" checked> カラー表示</label>
+            </div>
         </div>
         
         <div class="building-option" data-type="B" data-width="5.46" data-height="7.28" data-color="#27ae60">
             <strong>建物B（PLAN-②）</strong><br>
             サイズ: 5.46m × 7.28m<br>
             <small>戸建住宅（6×8グリッド）</small>
+            <div class="option-controls">
+                <label><input type="checkbox" id="colorB" checked> カラー表示</label>
+            </div>
         </div>
         
         <div class="building-option" data-type="C" data-width="42" data-height="43" data-color="#e67e22">
             <strong>サ高住</strong><br>
             サイズ: 42m × 43m<br>
             <small>サービス付き高齢者向け住宅（46×47グリッド）</small>
+            <div class="option-controls">
+                <label><input type="checkbox" id="colorC" checked> カラー表示</label>
+            </div>
         </div>
         
         <div class="building-option" data-type="D" data-width="19.5" data-height="34.2" data-color="#9b59b6">
             <strong>集合住宅</strong><br>
             サイズ: 19.5m × 34.2m<br>
             <small>アパート（21×38グリッド）</small>
+            <div class="option-controls">
+                <label><input type="checkbox" id="colorD" checked> カラー表示</label>
+            </div>
+        </div>
+        
+        <div class="global-options">
+            <h4>配置オプション</h4>
+            <label><input type="checkbox" id="pairPlacement"> 同一建物ペア配置（上下密着）</label><br>
+            <label><input type="checkbox" id="boxOnly"> 箱のみ表示（入口なし）</label>
         </div>
         
         <div class="controls">
@@ -65,6 +83,7 @@
             
             <p style="font-size: 12px; color: #666; margin-top: 10px;">
                 ※ 赤色マーカー＝入口（建物A,Bの下側）<br>
+                ※ ペア配置：同一建物を入口と反対側で密着<br>
                 ※ 短辺側：テラス(0.91m)＋玄関＋ポーチ(1.2m)のため間隔必要<br>
                 ※ 長辺側は密着配置可能<br>
                 ※ スケール: 1/1000 (1m = 4px)
