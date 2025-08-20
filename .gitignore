@@ -2,91 +2,33 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-Icon
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
 
 # Windows
 Thumbs.db
-Thumbs.db:encryptable
 ehthumbs.db
-ehthumbs_vista.db
-*.stackdump
-[Dd]esktop.ini
-$RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
+Desktop.ini
 
-# Linux
-*~
-.fuse_hidden*
-.directory
-.Trash-*
-.nfs*
-
-# IDE/Editor
-.vscode/
+# IDE
 .idea/
+.vscode/
 *.swp
 *.swo
-*.swn
-*.bak
-*.tmp
-*.sublime-project
-*.sublime-workspace
-.history/
 
-# Development tools
-.serena/
-.claude/
-.mcp.json
-*.log
+# Node.js (if npm is used later)
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Test coverage
-coverage/
-*.lcov
-.nyc_output/
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Build outputs
-dist/
-build/
-out/
-
-# Dependencies (if added later)
-node_modules/
-bower_components/
+# Logs
+logs/
+*.log
 
 # Temporary files
-tmp/
-temp/
+*.tmp
 *.temp
-*.cache
+.temp/
+.tmp/
 
-# Debug
-debug.log
-error.log
+# Cache
+.cache/

@@ -45,11 +45,29 @@
             buttonElement.classList.add('active');
         }
         
+        // オプションパネルの表示/非表示
+        document.querySelector('.drawing-options').style.display = (mode === 'draw') ? 'block' : 'none';
+        document.querySelector('.text-options').style.display = (mode === 'text') ? 'block' : 'none';
+        
+        // 描画モードの処理
+        if (mode === 'draw') {
+            appState.canvas.isDrawingMode = true;
+            appState.canvas.freeDrawingBrush = new fabric.PencilBrush(appState.canvas);
+            appState.canvas.freeDrawingBrush.width = parseInt(document.getElementById('brushWidth').value);
+            appState.canvas.freeDrawingBrush.color = document.getElementById('brushColor').value;
+        } else {
+            appState.canvas.isDrawingMode = false;
+        }
+        
         // 選択モードの場合は選択を有効化
         appState.canvas.selection = (mode === 'select');
         appState.canvas.getObjects().forEach(obj => {
-            // 背景画像とグリッドは選択不可のまま
-            if (!obj.excludeFromExport && obj !== window.backgroundImage && !obj.isBackground) {
+            // 背景画像、グリッド、図面枠は選択不可のまま
+            if (!obj.excludeFromExport && 
+                obj !== window.backgroundImage && 
+                !obj.isBackground && 
+                !obj.isGrid &&
+                obj.objectType !== 'drawingFrame') {
                 obj.selectable = (mode === 'select');
             }
         });
@@ -66,7 +84,11 @@
         const selectedType = window.SiteMapBuilding.getSelectedBuildingType();
         let status = '';
         
-        if (!selectedType) {
+        if (appState.currentMode === 'text') {
+            status = 'テキストモード - クリックしてテキストを追加';
+        } else if (appState.currentMode === 'draw') {
+            status = '描画モード - ドラッグして線を描画';
+        } else if (!selectedType) {
             status = '建物タイプを選択してください';
         } else if (appState.currentMode === 'select') {
             status = '選択モード - 建物をクリックして選択';
@@ -78,6 +100,38 @@
         return status;
     }
 
+    // レイヤー順序を維持する関数
+    function maintainLayerOrder() {
+        const canvas = appState.canvas;
+        
+        // 1. 背景画像を最背面
+        if (window.backgroundImage) {
+            canvas.sendToBack(window.backgroundImage);
+        }
+        
+        // 2. 図面枠を背景の次に配置
+        const drawingFrame = canvas.getObjects().find(obj => obj.objectType === 'drawingFrame');
+        if (drawingFrame) {
+            canvas.sendToBack(drawingFrame);
+            if (window.backgroundImage) {
+                canvas.bringForward(drawingFrame);
+            }
+        }
+        
+        // 3. グリッドを図面枠の前に配置
+        const gridLines = canvas.getObjects().filter(obj => obj.isGrid);
+        gridLines.forEach(grid => {
+            canvas.sendToBack(grid);
+            if (drawingFrame) {
+                canvas.bringForward(grid);
+            } else if (window.backgroundImage) {
+                canvas.bringForward(grid);
+            }
+        });
+        
+        canvas.renderAll();
+    }
+    
     // 既存の建物を再描画（箱のみモード切替時）
     function updateExistingBuildings() {
         const objects = appState.canvas.getObjects();
@@ -166,7 +220,9 @@
             const pointer = appState.canvas.getPointer(options.e);
             const selectedType = window.SiteMapBuilding.getSelectedBuildingType();
             
-            if (appState.currentMode === 'place' && selectedType && !options.target) {
+            if (appState.currentMode === 'text' && !options.target) {
+                window.SiteMapUtils.placeText(pointer.x, pointer.y);
+            } else if (appState.currentMode === 'place' && selectedType && !options.target) {
                 window.SiteMapBuilding.placeBuilding(pointer.x, pointer.y);
             } else if (appState.currentMode === 'area' && selectedType && !options.target) {
                 appState.isDrawing = true;
@@ -202,6 +258,11 @@
                     top: snapped.y
                 });
             }
+        });
+        
+        // オブジェクト移動後にレイヤー順序を維持
+        appState.canvas.on('object:modified', function(options) {
+            maintainLayerOrder();
         });
     
         // 短辺間隔スライダーのイベントハンドラー
@@ -274,6 +335,19 @@
             appState.selectionRect = null;
         });
         
+        // 選択時のレイヤー順序を維持
+        appState.canvas.on('selection:created', function(e) {
+            maintainLayerOrder();
+        });
+        
+        appState.canvas.on('selection:updated', function(e) {
+            maintainLayerOrder();
+        });
+        
+        appState.canvas.on('selection:cleared', function(e) {
+            maintainLayerOrder();
+        });
+        
         // ペア配置チェックボックスのイベントハンドラー
         const pairPlacementCheckbox = document.getElementById('pairPlacement');
         if (pairPlacementCheckbox) {
@@ -307,6 +381,38 @@
                 });
             }
         });
+        
+        // 描画設定
+        const brushWidthSlider = document.getElementById('brushWidth');
+        const brushWidthValue = document.getElementById('brushWidthValue');
+        const brushColorInput = document.getElementById('brushColor');
+        
+        if (brushWidthSlider) {
+            brushWidthSlider.addEventListener('input', function(e) {
+                brushWidthValue.textContent = e.target.value;
+                if (appState.canvas.freeDrawingBrush) {
+                    appState.canvas.freeDrawingBrush.width = parseInt(e.target.value);
+                }
+            });
+        }
+        
+        if (brushColorInput) {
+            brushColorInput.addEventListener('input', function(e) {
+                if (appState.canvas.freeDrawingBrush) {
+                    appState.canvas.freeDrawingBrush.color = e.target.value;
+                }
+            });
+        }
+        
+        // テキスト設定
+        const fontSizeSlider = document.getElementById('fontSize');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        
+        if (fontSizeSlider) {
+            fontSizeSlider.addEventListener('input', function(e) {
+                fontSizeValue.textContent = e.target.value;
+            });
+        }
     }
 
     // 初期化

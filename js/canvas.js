@@ -19,6 +19,7 @@
     let canvas;
     let gridLines = [];
     let backgroundImage = null;
+    let currentZoom = 1; // ズームレベル
 
     // Fabric.jsキャンバスの初期化
     function initializeCanvas() {
@@ -33,7 +34,8 @@
         canvas = new fabric.Canvas('canvas', {
             width: CANVAS_WIDTH,
             height: CANVAS_HEIGHT,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            preserveObjectStacking: true  // オブジェクトの重なり順を保持
         });
         
         // グローバル変数を設定（互換性のため）
@@ -62,15 +64,22 @@
         // 10グリッドごとに太線、1グリッドごとに細線
         const majorGridInterval = 10; // 9.1mごと
         
+        // ズームを考慮したグリッドサイズ
+        const zoomedGridSize = GRID_SIZE * currentZoom;
+        const zoomedWidth = CANVAS_WIDTH * currentZoom;
+        const zoomedHeight = CANVAS_HEIGHT * currentZoom;
+        
         // 縦線
         for (let i = 0; i <= CANVAS_WIDTH / GRID_SIZE; i++) {
             const isMajor = i % majorGridInterval === 0;
-            const line = new fabric.Line([i * GRID_SIZE, 0, i * GRID_SIZE, CANVAS_HEIGHT], {
+            const x = i * zoomedGridSize;
+            const line = new fabric.Line([x, 0, x, zoomedHeight], {
                 stroke: isMajor ? '#bbb' : '#e8e8e8',
                 strokeWidth: isMajor ? 1 : 0.5,
                 selectable: false,
                 evented: false,
-                excludeFromExport: true
+                excludeFromExport: true,
+                isGrid: true
             });
             gridLines.push(line);
             canvas.add(line);
@@ -79,12 +88,14 @@
         // 横線
         for (let j = 0; j <= CANVAS_HEIGHT / GRID_SIZE; j++) {
             const isMajor = j % majorGridInterval === 0;
-            const line = new fabric.Line([0, j * GRID_SIZE, CANVAS_WIDTH, j * GRID_SIZE], {
+            const y = j * zoomedGridSize;
+            const line = new fabric.Line([0, y, zoomedWidth, y], {
                 stroke: isMajor ? '#bbb' : '#e8e8e8',
                 strokeWidth: isMajor ? 1 : 0.5,
                 selectable: false,
                 evented: false,
-                excludeFromExport: true
+                excludeFromExport: true,
+                isGrid: true
             });
             gridLines.push(line);
             canvas.add(line);
@@ -151,15 +162,24 @@
                     canvas.remove(backgroundImage);
                 }
                 
+                // 現在のズームレベルを考慮した配置
+                const scaleX = (CANVAS_WIDTH / img.width) * currentZoom;
+                const scaleY = (CANVAS_HEIGHT / img.height) * currentZoom;
+                const scale = Math.min(scaleX, scaleY) * 0.9; // 少し余白を持たせる
+                
                 // 背景画像の設定（中央配置）
                 img.set({
-                    left: (CANVAS_WIDTH - img.width) / 2,
-                    top: (CANVAS_HEIGHT - img.height) / 2,
+                    left: (CANVAS_WIDTH * currentZoom - img.width * scale) / 2,
+                    top: (CANVAS_HEIGHT * currentZoom - img.height * scale) / 2,
+                    scaleX: scale,
+                    scaleY: scale,
                     selectable: false,
                     evented: false,
                     excludeFromExport: false,
                     opacity: CONFIG.PDF_BACKGROUND.OPACITY,
-                    isBackground: true // 背景であることを示すカスタムプロパティ
+                    isBackground: true, // 背景であることを示すカスタムプロパティ
+                    originalScaleX: scale / currentZoom, // ズーム前のスケール保存
+                    originalScaleY: scale / currentZoom
                 });
                 
                 backgroundImage = img;
@@ -195,6 +215,75 @@
         }
     }
 
+    // ズーム機能
+    const MIN_ZOOM = 0.5;
+    const MAX_ZOOM = 3;
+    const ZOOM_STEP = 0.2;
+
+    function zoomIn() {
+        if (currentZoom < MAX_ZOOM) {
+            currentZoom = Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM);
+            applyZoom();
+        }
+    }
+
+    function zoomOut() {
+        if (currentZoom > MIN_ZOOM) {
+            currentZoom = Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
+            applyZoom();
+        }
+    }
+
+    function resetZoom() {
+        currentZoom = 1;
+        applyZoom();
+    }
+
+    function applyZoom() {
+        // キャンバスのズームを設定
+        canvas.setZoom(currentZoom);
+        
+        // キャンバスのサイズを更新（ズーム後のサイズ）
+        const CONFIG = getConfig();
+        const newWidth = CONFIG.CANVAS.WIDTH * currentZoom;
+        const newHeight = CONFIG.CANVAS.HEIGHT * currentZoom;
+        canvas.setWidth(newWidth);
+        canvas.setHeight(newHeight);
+        
+        // 背景画像がある場合は再配置
+        if (backgroundImage) {
+            backgroundImage.scaleX = backgroundImage.originalScaleX * currentZoom;
+            backgroundImage.scaleY = backgroundImage.originalScaleY * currentZoom;
+        }
+        
+        // グリッドの再描画
+        if (gridLines && gridLines.length > 0) {
+            gridLines.forEach(line => {
+                canvas.remove(line);
+            });
+            gridLines = [];
+            drawGrid();
+        }
+        
+        canvas.renderAll();
+        updateZoomStatus();
+    }
+
+    function updateZoomStatus() {
+        const zoomPercent = Math.round(currentZoom * 100);
+        
+        // ステータス更新
+        if (window.SiteMapUtils) {
+            window.SiteMapUtils.updateStatus(`ズーム: ${zoomPercent}%`);
+        }
+        
+        // ズームリセットボタンのテキストを更新
+        const zoomResetBtn = document.querySelector('button[onclick="SiteMapCanvas.resetZoom()"]');
+        if (zoomResetBtn) {
+            zoomResetBtn.textContent = `${zoomPercent}%`;
+        }
+    }
+
     // 公開API
     window.SiteMapCanvas = {
         initializeCanvas,
@@ -202,9 +291,13 @@
         toggleGrid,
         loadPDF,
         clearBackground,
+        zoomIn,
+        zoomOut,
+        resetZoom,
         getCanvas: () => canvas,
         getBackgroundImage: () => backgroundImage,
-        getGridLines: () => gridLines
+        getGridLines: () => gridLines,
+        getCurrentZoom: () => currentZoom
     };
     
 })(window);

@@ -16,6 +16,8 @@
             <button class="mode-button active" onclick="setMode('select')">選択</button>
             <button class="mode-button" onclick="setMode('place')">配置</button>
             <button class="mode-button" onclick="setMode('area')">範囲配置</button>
+            <button class="mode-button" onclick="setMode('text')">テキスト</button>
+            <button class="mode-button" onclick="setMode('draw')">描画</button>
         </div>
         
         <h3>建物タイプ</h3>
@@ -62,6 +64,22 @@
             <label><input type="checkbox" id="boxOnly"> 箱のみ表示（入口なし）</label>
         </div>
         
+        <div class="drawing-options" style="display: none;">
+            <h4>描画設定</h4>
+            <label for="brushWidth">線の太さ: <span id="brushWidthValue">2</span>px</label>
+            <input type="range" id="brushWidth" min="1" max="10" step="1" value="2" style="width: 100%;">
+            <label for="brushColor">線の色:</label>
+            <input type="color" id="brushColor" value="#000000" style="width: 100%;">
+        </div>
+        
+        <div class="text-options" style="display: none;">
+            <h4>テキスト設定</h4>
+            <label for="fontSize">フォントサイズ: <span id="fontSizeValue">16</span>px</label>
+            <input type="range" id="fontSize" min="10" max="48" step="2" value="16" style="width: 100%;">
+            <label for="fontColor">テキスト色:</label>
+            <input type="color" id="fontColor" value="#000000" style="width: 100%;">
+        </div>
+        
         <div class="controls">
             <h3>配置情報</h3>
             
@@ -97,9 +115,14 @@
             <button onclick="SiteMapUtils.rotateSelected()">90度回転</button>
             <button onclick="SiteMapUtils.clearAll()">すべて削除</button>
             <button onclick="SiteMapCanvas.toggleGrid()">グリッド表示/非表示</button>
+            <button onclick="SiteMapCanvas.zoomIn()" title="拡大">＋</button>
+            <button onclick="SiteMapCanvas.zoomOut()" title="縮小">－</button>
+            <button onclick="SiteMapCanvas.resetZoom()" title="ズームリセット">100%</button>
             <input type="file" id="pdfInput" accept=".pdf" style="display: none;" onchange="SiteMapCanvas.loadPDF(event)">
             <button onclick="document.getElementById('pdfInput').click()">PDF読込</button>
             <button onclick="SiteMapCanvas.clearBackground()">背景クリア</button>
+            <button id="compassBtn" onclick="SiteMapUtils.addCompass()">方位マーク追加</button>
+            <button id="frameBtn" onclick="SiteMapUtils.addDrawingFrame()">図面枠追加</button>
             <button onclick="SiteMapUtils.exportJSON()">JSON出力</button>
             <button onclick="SiteMapUtils.exportPDF()">PDF出力</button>
             <span class="status" id="status">建物タイプを選択してください</span>

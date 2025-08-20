@@ -49,6 +49,13 @@ Modular file structure with namespace-based organization:
   - Long sides (vertical) spacing is adjustable (0-5m, default 1.2m)
   - Grid snapping ensures proper alignment
 
+## Additional Features
+
+- **Direction Marker**: Add compass/north arrow from direction.png image (toggle on/off)
+- **Text Mode**: Add editable text annotations with customizable font size and color
+- **Drawing Mode**: Freehand drawing with adjustable brush size and color
+- **Drawing Frame**: Standard architectural drawing frame from frame.png image (toggle on/off)
+
 ## Important Considerations
 
 - All UI text and code comments are in Japanese
@@ -72,6 +79,9 @@ Centralized configuration object containing all constants and settings:
 - `toggleGrid()` - Show/hide grid
 - `loadPDF(event)` - Load PDF background
 - `clearBackground()` - Clear PDF background
+- `zoomIn()` - Zoom in by 20%
+- `zoomOut()` - Zoom out by 20%
+- `resetZoom()` - Reset zoom to 100%
 
 ### SiteMapBuilding
 - `placeBuilding(x, y)` - Place single building
@@ -81,13 +91,16 @@ Centralized configuration object containing all constants and settings:
 - `updateGridInfo(width, height)` - Update placement information display
 
 ### SiteMapUtils
-- `deleteSelected()` - Delete selected building(s)
-- `rotateSelected()` - Rotate selected building 90 degrees
-- `clearAll()` - Clear all buildings
+- `deleteSelected()` - Delete selected element(s)
+- `rotateSelected()` - Rotate selected element 90 degrees
+- `clearAll()` - Clear all elements
 - `exportJSON()` - Export building data as JSON
-- `exportPDF()` - Export to PDF (TODO)
+- `exportPDF()` - Export to PDF
 - `snapToGrid(value)` - Snap value to grid
 - `calculatePlacementCapacity()` - Calculate building placement capacity
+- `addCompass()` - Toggle compass/direction marker (direction.png)
+- `placeText(x, y)` - Place editable text at coordinates
+- `addDrawingFrame()` - Toggle architectural drawing frame (frame.png)
 
 ### SiteMapMain
-- `setMode(mode)` - Switch between select/place/area modes
+- `setMode(mode)` - Switch between select/place/area/text/draw modes

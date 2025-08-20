@@ -207,3 +207,61 @@ input[type="range"] {
     margin-bottom: 8px;
     font-size: 13px;
 }
+
+/* 新機能用スタイル */
+.drawing-options,
+.text-options {
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 6px;
+    margin: 15px 0;
+}
+
+.drawing-options h4,
+.text-options h4 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #666;
+}
+
+.drawing-options label,
+.text-options label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.drawing-options input[type="range"],
+.text-options input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.drawing-options input[type="color"],
+.text-options input[type="color"] {
+    width: 100%;
+    height: 30px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* モードボタンの幅調整（5つになったため） */
+.mode-buttons {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.mode-button {
+    flex: 1;
+    min-width: 70px;
+    padding: 8px 6px;
+    background: #e0e0e0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}

@@ -449,7 +449,7 @@
         if (showEntrance) {
             const entrance2 = new fabric.Rect({
                 left: width / 2 - CONFIG.ENTRANCE_MARKER.WIDTH / 2,
-                top: CONFIG.ENTRANCE_MARKER.OFFSET_FROM_BOTTOM,
+                top: 0,  // 入口を上端に配置
                 width: CONFIG.ENTRANCE_MARKER.WIDTH,
                 height: CONFIG.ENTRANCE_MARKER.HEIGHT,
                 fill: CONFIG.ENTRANCE_MARKER.COLOR
